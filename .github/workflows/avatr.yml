@@ -1,7 +1,27 @@
-name: Build AVATR AirPlay Receiver
+name: build-apk
 on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo x
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "21"
+          cache: gradle
+      - name: sign
+        run: |
+          echo "${{ secrets.AIRPLAY_STORE }}" | base64 -d > airplay-release.jks
+          test -s airplay-release.jks && echo keystore-ok
+      - name: build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: app/build/outputs/apk/release/app-release.apk
