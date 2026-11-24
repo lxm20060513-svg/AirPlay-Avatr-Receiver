@@ -1,19 +1,7 @@
 name: Build AVATR AirPlay Receiver
-on:
-  workflow_dispatch:
-  push:
-    tags: ["v*.*.*"]
-permissions:
-  contents: write
+on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: "21"
-          cache: gradle
+      - run: echo x
