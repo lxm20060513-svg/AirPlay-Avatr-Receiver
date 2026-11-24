@@ -1,7 +1,0 @@
-name: t8-localprops
-on: workflow_dispatch
-jobs:
-  j:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "len=${{ secrets.AIRPLAY_LOCAL_PROPS }}"

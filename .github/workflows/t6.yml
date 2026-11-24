@@ -1,9 +1,0 @@
-name: t6-env-secret
-on: workflow_dispatch
-jobs:
-  j:
-    runs-on: ubuntu-latest
-    steps:
-      - env:
-          KS: ${{ secrets.AIRPLAY_STORE }}
-        run: echo "${#KS}"

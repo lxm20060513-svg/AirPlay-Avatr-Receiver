@@ -1,7 +1,0 @@
-name: t4-bogus-secret
-on: workflow_dispatch
-jobs:
-  j:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "len=${{ secrets.NOT_EXIST_XYZ }}"

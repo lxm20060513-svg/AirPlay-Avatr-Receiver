@@ -1,7 +1,0 @@
-name: t5-gh-token
-on: workflow_dispatch
-jobs:
-  j:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "${{ secrets.GITHUB_TOKEN }}" | head -c 3

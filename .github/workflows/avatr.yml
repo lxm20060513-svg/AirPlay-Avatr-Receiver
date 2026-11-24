@@ -1,5 +1,10 @@
 name: build-apk
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,16 +17,27 @@ jobs:
           distribution: zulu
           java-version: "21"
           cache: gradle
-      - name: sign
+      - name: inject-signing
         run: |
           echo "${{ secrets.AIRPLAY_STORE }}" | base64 -d > airplay-release.jks
-          test -s airplay-release.jks && echo keystore-ok
+          echo "${{ secrets.AIRPLAY_LOCAL_PROPS }}" | base64 -d > local.properties
+          test -s airplay-release.jks && echo "keystore-bytes=$(stat -c %s airplay-release.jks)"
       - name: build
         run: |
           chmod +x ./gradlew
           ./gradlew :app:assembleRelease --no-daemon --stacktrace
-      - name: upload
-        uses: actions/upload-artifact@v4
+      - name: verify-artifact
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          ls -l "$APK"
+          sha256sum "$APK"
+      - name: strip-secrets
+        run: rm -f airplay-release.jks local.properties
+      - uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: airplay-receiver-apk
           path: app/build/outputs/apk/release/app-release.apk
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/app-release.apk
