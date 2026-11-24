@@ -1,4 +1,11 @@
-# AirPlay Receiver for Android
+# AirPlay Receiver for Android（阿维塔11 车机中文分支）
+
+> **本仓说明**：基于 [jqssun/android-airplay-server](https://github.com/jqssun/android-airplay-server)（GPL-3.0）的车机适配分支，只改三处即可与官方版共存：
+> 1. 界面汉化 —— 新增 `app/src/main/res/values-zh/strings.xml`（163 条全量）
+> 2. 包名 `com.avatr.airplay`、设备名默认「阿维塔11」，与官方 `io.github.jqssun.airplay` 互不覆盖
+> 3. CI 换成自建签名（`.github/workflows/avatr.yml`），产物 `app-release.apk`
+>
+> 上游能力、许可证与版权归属不变，本分支同样以 GPL-3.0 发布。
 
 [![Stars](https://img.shields.io/github/stars/jqssun/android-airplay-server)](https://github.com/jqssun/android-airplay-server)
 [![GitHub](https://img.shields.io/github/downloads/jqssun/android-airplay-server/total?label=GitHub&logo=GitHub)](https://github.com/jqssun/android-airplay-server/releases)
