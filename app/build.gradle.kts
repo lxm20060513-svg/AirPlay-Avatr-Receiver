@@ -58,7 +58,11 @@ android {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfigs.findByName("release")?.let { signingConfig = it }
-            ndk { abiFilters += allAbis }
+            // 车机专用：麒麟990A 是 aarch64，x86_64（模拟器）与 armeabi-v7a 只白占 ~14MB
+            ndk {
+                abiFilters.clear()
+                abiFilters += "arm64-v8a"
+            }
         }
         // debuggable build with HWASan (arm64) + UBSan in native code
         create("sanitize") {
