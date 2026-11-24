@@ -1,0 +1,9 @@
+name: t1-secrets
+on: workflow_dispatch
+jobs:
+  j:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "${{ secrets.AIRPLAY_STORE }}" | base64 -d > /tmp/k.jks
+          ls -l /tmp/k.jks

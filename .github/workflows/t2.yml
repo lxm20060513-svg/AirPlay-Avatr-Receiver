@@ -1,0 +1,11 @@
+name: t2-upload
+on: workflow_dispatch
+jobs:
+  j:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo hi > a.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: a.txt

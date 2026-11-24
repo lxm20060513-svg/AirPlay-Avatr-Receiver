@@ -1,0 +1,9 @@
+name: t3-gradle
+on: workflow_dispatch
+jobs:
+  j:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --no-daemon
