@@ -1,5 +1,10 @@
 name: Build AVATR AirPlay Receiver
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,4 +17,24 @@ jobs:
           distribution: zulu
           java-version: "21"
           cache: gradle
-      - run: echo "chk"
+      - name: Inject signing material
+        run: |
+          echo "${{ secrets.AIRPLAY_STORE }}" | base64 -d > airplay-release.jks
+          echo "${{ secrets.AIRPLAY_LOCAL_PROPS }}" | base64 -d > local.properties
+          test -s airplay-release.jks
+          grep -c storeFile local.properties
+      - name: Build release APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --stacktrace --no-daemon
+      - name: Strip secrets
+        run: rm -f airplay-release.jks local.properties
+      - uses: actions/upload-artifact@v4
+        with:
+          name: airplay-receiver-apk
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/app-release.apk
