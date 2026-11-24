@@ -1,0 +1,61 @@
+name: Build AVATR AirPlay Receiver
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  MODULE: app
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with native submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "21"
+          cache: gradle
+
+      - name: Inject signing material
+        run: |
+          echo "${{ secrets.AIRPLAY_STORE }}" | base64 -d > airplay-release.jks
+          echo "${{ secrets.AIRPLAY_LOCAL_PROPS }}" | base64 -d > local.properties
+          test -s airplay-release.jks && echo "keystore bytes: $(stat -c %s airplay-release.jks)"
+          grep -c storeFile local.properties
+
+      - name: Build release APK
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+          chmod +x ./gradlew
+          ./gradlew :${{ env.MODULE }}:assembleRelease --stacktrace --no-daemon
+
+      - name: Verify artifact
+        run: |
+          APK=${{ env.MODULE }}/build/outputs/apk/release/app-release.apk
+          ls -l "$APK"
+          echo "sha256=$(sha256sum "$APK" | cut -d' ' -f1)" >> $GITHUB_ENV
+          echo "size=$(stat -c %s "$APK")" >> $GITHUB_ENV
+          rm -f airplay-release.jks local.properties
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AirPlayReceiver-${{ github.ref_name }}-${{ env.size }}
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: app/build/outputs/apk/release/app-release.apk
