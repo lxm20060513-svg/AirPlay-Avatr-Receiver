@@ -33,8 +33,8 @@ android {
         applicationId = "com.avatr.airplay"
         minSdk = 23
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0-avatr"
+        versionCode = 2
+        versionName = "0.1.1-avatr"
 
         externalNativeBuild {
             cmake {
