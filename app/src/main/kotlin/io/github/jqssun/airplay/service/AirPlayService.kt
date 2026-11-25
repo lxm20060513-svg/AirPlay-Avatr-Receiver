@@ -348,10 +348,14 @@ class AirPlayService : LifecycleService(), RaopCallbackHandler, LogListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_START_SERVER) {
-            promoteToForeground()
-            _startServer(ensureServiceStarted = false)
-            if (_serverState.value != ServerState.RUNNING) stopSelf(startId)
+        when (intent?.action) {
+            ACTION_START_SERVER -> {
+                promoteToForeground()
+                _startServer(ensureServiceStarted = false)
+                if (_serverState.value != ServerState.RUNNING) stopSelf(startId)
+            }
+            // 车机侧（灵动屏）点「关闭」时派发过来：停服务，端口停止 accept
+            ACTION_STOP_SERVER -> stopServer()
         }
         return START_NOT_STICKY
     }
@@ -1187,6 +1191,7 @@ class AirPlayService : LifecycleService(), RaopCallbackHandler, LogListener {
         const val ACTION_NEXT = "io.github.jqssun.airplay.NEXT"
         const val ACTION_PREV = "io.github.jqssun.airplay.PREV"
         const val ACTION_START_SERVER = "io.github.jqssun.airplay.START_SERVER"
+        const val ACTION_STOP_SERVER = "com.avatr.airplay.STOP_SERVER"
         // shared with dpad/double-tap seeks
         const val VIDEO_SEEK_STEP_MS = 10_000L
         const val VIDEO_POLL_PENDING_TIMEOUT_MS = 3_000L

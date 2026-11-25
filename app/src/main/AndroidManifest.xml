@@ -61,6 +61,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- 车机（灵动屏）控制接收端开关：START 起服务 / STOP 停服并让界面退出。
+             只给同车机上的自家 App 用，无远程暴露面；不需要权限。 -->
+        <receiver
+            android:name=".ControlReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.avatr.airplay.START" />
+                <action android:name="com.avatr.airplay.STOP" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".SettingsReceiver"
             android:exported="true"

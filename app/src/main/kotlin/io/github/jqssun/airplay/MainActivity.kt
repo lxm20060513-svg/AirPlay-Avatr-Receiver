@@ -75,6 +75,14 @@ class MainActivity : ComponentActivity() {
 
         bindService(Intent(this, AirPlayService::class.java), connection, BIND_AUTO_CREATE)
 
+        // 同进程内广播（ControlReceiver 发的），NOT_EXPORTED 就够，别给外部 App 留口子
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
+            finishReceiver,
+            android.content.IntentFilter(ControlReceiver.ACTION_FINISHED),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -207,7 +215,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** 车机侧点「关闭」时派发的收尾广播：停了服务就把界面一起收掉，别留死界面 */
+    private val finishReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            if (intent?.action == ControlReceiver.ACTION_FINISHED) finishAndRemoveTask()
+        }
+    }
+
     override fun onDestroy() {
+        runCatching { unregisterReceiver(finishReceiver) }
         service?.let {
             if (it.logCallback === logCallback) it.logCallback = null
             if (it.pinCallback === pinCallback) it.pinCallback = null
